@@ -1,0 +1,29 @@
+{% extends "dashboard/resumen_calificaciones_base.html" %}
+
+{% block tabla%}
+    <table class="table table-bordered table-striped table-td-valign-middle display tabla-fix">
+        <thead>
+        <tr>
+            <th>{{tipo}}</th>
+            <th>Evaluación</th>
+            <th>Calificación</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for calificacion, evaluaciones in respuestas.items %}
+                <tr>
+                    <td rowspan="{{ evaluaciones|length }}">{{ calificacion.nivel_evaluacion.obtener_descripcion_completa }}</td>
+                    {% for informacion_evaluacion in evaluaciones %}
+                        {% for evaluacion, resultado in informacion_evaluacion.items %}
+                            <td>{{ evaluacion.nombre }}</td>
+                            <td>{{ resultado|floatformat:2 }}</td>
+                        {% endfor %}
+                        </tr>
+                    {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+
+

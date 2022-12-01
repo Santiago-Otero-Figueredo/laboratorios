@@ -1,0 +1,120 @@
+{% extends "base_tablas.html" %}
+
+{% load tags_niveles_evaluacion %}
+
+{% load static %}
+{% load bootstrap4 %}
+
+{% block titulo %}
+    Resumen niveles evaluación
+{% endblock %}
+
+{% block titulo_pagina %}
+    Resumen niveles evaluación
+{% endblock titulo_pagina %}
+
+{% block miga_pan %}
+    <li class="breadcrumb-item"><a href="javascript:;">Reportes</a></li>
+    <li class="breadcrumb-item active"><a href="javascript:;">Resumen niveles evaluación</a></li>
+{% endblock miga_pan %}
+
+{% block titulo_panel %}
+    Resumen niveles evaluación
+{% endblock titulo_panel %}
+
+{% block contenido_panel %}
+    <div class="row">
+        <div class="col-8 my-2">
+            A continuación se muestra la información de las competencias a evaluar en el curso de <b>{{ curso }}</b>
+        </div>
+        <div class="col-4 mt-2">
+            <a class="btn btn-xs btn-secondary text-left" href="{% url 'dashboards:evaluacion_cursos' %}">Volver a evaluación cursos</a>
+        </div>
+    </div>
+    <form method="GET">
+        <hr>
+        <div class="row align-items-center">
+            <div class="col-2">
+                {% bootstrap_field form.ano %}
+            </div>
+            <div class="col-2">
+                {% bootstrap_field form.periodo_academico %}
+            </div>
+            <div class="col-3">
+                {% bootstrap_field form.programa %}
+            </div>
+            <div class="col-3">
+                {% bootstrap_field form.profesor %}
+            </div>
+            <div class="col-2">
+                <input type="submit" class="btn btn-md btn-info" value="Filtrar">
+            </div>
+        </div>
+        <hr>
+
+
+    </form>
+    <div class="contenedor-tabla mt-3">
+        {% if niveles_evaluacion %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        {% for tipo_nivel in tipos %}
+                            <th>{{tipo_nivel.nombre}}. {{tipo_nivel.descripcion}}</th>
+                            {% if tipo_nivel.niveles_evaluacion_asociados.all.1.mide_porcentaje %}
+                                <th>%{{tipo_nivel.nombre}}</th>
+                            {% endif %}
+                        {% endfor %}
+                        {% if profesor %}
+                            <th>%IL</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="text-left" style="vertical-align: middle;">
+                    {% for nivel in niveles_evaluacion %}
+
+                            {% if nivel.es_elemento_raiz %}
+                                <tr>
+                                    <td rowspan=" {{ nivel.cantidad_hijos_hoja }}">
+                                        {{nivel.nombre}}. {{nivel.descripcion}}
+                                    </td>
+                            {% endif %}
+                            {% for sub_nivel in nivel.informacion_hijos %}
+                                {% if sub_nivel.es_primer_elemento and not nivel.es_elemento_raiz %}
+                                    <tr>
+                                {% endif %}
+                                <td rowspan=" {{ sub_nivel.cantidad_hijos_hoja }}">
+                                    {{sub_nivel.nombre}}. {{sub_nivel.descripcion}}
+                                </td>
+                                {% if sub_nivel.mide_porcentaje %}
+                                    <td rowspan=" {{ sub_nivel.cantidad_hijos_hoja }}">
+                                        {{sub_nivel.porcentaje}}
+                                    </td>
+                                {% endif %}
+                                {% for nivel_hoja in sub_nivel.informacion_hijos %}
+                                    {% if not nivel.es_elemento_raiz and not sub_nivel.es_primer_elemento %}
+                                        <tr>
+                                    {% endif %}
+                                        <td>
+                                            {{nivel_hoja.nombre}}. {{nivel_hoja.descripcion}}
+                                        </td>
+                                        {% if profesor %}
+                                            <td> {% obtener_porcentajes_curso_programa nivel_hoja.pk profesor_curso_del_programa.pk %}% </td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+
+                            {% endfor %}
+
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="bg-info text-white text-center px-2 py-2 mt-3">
+                Este curso no tiene niveles de evaluación asociados
+            </div>
+        {% endif %}
+
+    </div>
+
+{% endblock contenido_panel %}

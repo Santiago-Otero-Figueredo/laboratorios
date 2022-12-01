@@ -1,0 +1,78 @@
+{% extends "base_tablas.html" %}
+
+{% load bootstrap4 %}
+
+{% block titulo %}
+    Listado de practicas de laboratorios
+{% endblock titulo %}
+
+{% block miga_pan %}
+    <li class="breadcrumb-item"><a href="javascript:;">Laboratorios</a></li>
+    <li class="breadcrumb-item"><a href="javascript:;">Practicas</a></li>
+    <li class="breadcrumb-item active"><a href="javascript:;">Listado</a></li>
+{% endblock miga_pan %}
+
+{% block titulo_pagina %}
+    Listado de practicas de laboratorios
+{% endblock titulo_pagina %}
+
+{% block titulo_panel %}
+    Listado de practicas de laboratorios
+{% endblock titulo_panel %}
+
+{% block contenido_panel %}
+    <div class="row">
+        <div class="col-12 m-t-10">
+            <table class="table table-hover table-responsive datatable">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Laboratorio</th>
+                        <th>Grupo</th>
+                        <th>Fecha inicio</th>
+                        <th>Fecha final</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for practica in practicas_laboratorio %}
+                        <tr>
+                            <td>
+                                {{practica.nombre}}
+                            </td>
+                            <td>
+                                {{practica.laboratorio}}
+                            </td>
+                            <td>
+                                {{practica.grupo}}
+                            </td>
+                            <td>
+                                {{practica.fecha_inicio}}
+                            </td>
+                            <td>
+                                {{practica.fecha_fin}}
+                            </td>
+                            <td>
+                                {% if practica.activa %}
+                                    <label class="text-success">Activo</label>
+                                {% else %}
+                                    <label class="text-danger" >Inactivo</label>
+                                {% endif %}
+                            </td>
+                            <td>
+                               <a href="{% url 'laboratorios:actualizar_practica' practica.pk %}" class="btn btn-xs btn-info">Actualizar</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    <div class="col-lg">
+        <div id="calendar" class="calendar fc fc-media-screen fc-direction-ltr fc-theme-bootstrap">
+
+        </div>
+    </div>
+{% endblock contenido_panel %}

@@ -1,0 +1,56 @@
+{% extends "base_tablas.html" %}
+
+{% load bootstrap4 %}
+
+{% block titulo %}
+    Listado de campos extra
+{% endblock titulo %}
+
+{% block miga_pan %}
+    <li class="breadcrumb-item"><a href="javascript:;">Equipos</a></li>
+    <li class="breadcrumb-item"><a href="javascript:;">Campos extra</a></li>
+    <li class="breadcrumb-item active"><a href="javascript:;">Listado</a></li>
+{% endblock miga_pan %}
+
+{% block titulo_pagina %}
+    Listado de campos extra
+{% endblock titulo_pagina %}
+
+{% block titulo_panel %}
+    Listado de campos extra
+{% endblock titulo_panel %}
+
+{% block contenido_panel %}
+    <div class="row">
+        <div class="col-12 m-t-10">
+            <table class="table table-hover table-responsive datatable">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for campo in campos_extra %}
+                        <tr>
+                            <td>
+                                {{campo.nombre}}
+                            </td>
+                            <td>
+                                {% if campo.activa %}
+                                    <label class="text-success">Activo</label>
+                                {% else %}
+                                    <label class="text-danger" >Inactivo</label>
+                                {% endif %}
+                            </td>
+                            <td>
+                               <a href="{% url 'equipos:actualizar_campo' campo.pk %}" class="btn btn-xs btn-info">Actualizar</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock contenido_panel %}

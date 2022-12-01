@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load bootstrap4 %}
+
+{% block titulo %}
+    {%if object %}Modificar información adicional equipo - {{object}} {%else%}Registrar información adicional del equipo - {{equipo}} {%endif%}
+{% endblock titulo %}
+
+{% block titulo_pagina %}
+    {%if object %}Modificar información adicional equipo - {{object}} {%else%}Registrar información adicional del equipo - {{equipo}} {%endif%}
+{% endblock titulo_pagina %}
+
+{% block miga_pan %}
+    <li class="breadcrumb-item"><a href="javascript:;">Equipo</a></li>
+    <li class="breadcrumb-item">{%if object %}Modificar {%else%}Registrar {%endif%}</li>
+    <li class="breadcrumb-item"><a href="javascript:;">Información adicional</a></li>
+    <li class="breadcrumb-item active"><a href="javascript:;">{%if object %} {{object}} {%else%} {{equipo}} {%endif%}</a></li>
+
+{% endblock miga_pan %}
+
+{% block titulo_panel %}
+    {%if object %}Modificar información adicional equipo - {{object}} {%else%}Registrar información adicional del equipo - {{equipo}} {%endif%}
+{% endblock titulo_panel %}
+
+{% block contenido_panel %}
+    <div class="row">
+        <div class="col-12">
+            {%if object %}Modificar {%else%}Registrar {%endif%} la información adicional de un equipo
+        </div>
+    </div>
+    <form method="post" autocomplete="off">{% csrf_token %}
+        <div class="row mt-3">
+            <div class="col-12">
+                {% bootstrap_form form %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <a class="btn btn-secondary" href="{% url 'equipos:listado_informacion' equipo.pk %}">
+                    <i class="icon-arrow-left"></i> Volver
+                </a>
+            </div>
+            <div class="col-6" align="right">
+                <button class="btn btn-principal" type="submit">
+                    {%if object %}Modificar {%else%}Registrar información adicional equipo {%endif%}<i class="icon-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+{% endblock contenido_panel %}

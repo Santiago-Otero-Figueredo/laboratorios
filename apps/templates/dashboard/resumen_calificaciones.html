@@ -1,0 +1,22 @@
+{% extends "dashboard/resumen_calificaciones_base.html" %}
+
+
+{% block tabla%}
+    <table class="table table-bordered table-striped table-td-valign-middle display tabla-fix">
+        <thead>
+        <tr>
+            <th>{{tipo}}</th>
+            <th>Calificación</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for respuesta, resultado in respuestas.items %}
+                <tr>
+                    <td>{{ respuesta.nivel_evaluacion.obtener_descripcion_completa }}</td>
+                    <td>{{ resultado|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock tabla%}
+

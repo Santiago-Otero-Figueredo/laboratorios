@@ -1,0 +1,59 @@
+{% extends "base_tablas.html" %}
+
+{% load bootstrap4 %}
+
+{% block titulo %}
+    Listado de laboratorios
+{% endblock titulo %}
+
+{% block miga_pan %}
+    <li class="breadcrumb-item"><a href="javascript:;">Laboratorios</a></li>
+    <li class="breadcrumb-item active"><a href="javascript:;">Listado</a></li>
+{% endblock miga_pan %}
+
+{% block titulo_pagina %}
+    Listado de laboratorios
+{% endblock titulo_pagina %}
+
+{% block titulo_panel %}
+    Listado de laboratorios
+{% endblock titulo_panel %}
+
+{% block contenido_panel %}
+    <div class="row">
+        <div class="col-12 m-t-10">
+            <table class="table table-hover table-responsive datatable">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for laboratorio in laboratorios %}
+                        <tr>
+                            <td>
+                                {{laboratorio.nombre}}
+                            </td>
+                            <td>
+                                {{laboratorio.descripcion}}
+                            </td>
+                            <td>
+                                {% if laboratorio.activa %}
+                                    <label class="text-success">Activo</label>
+                                {% else %}
+                                    <label class="text-danger" >Inactivo</label>
+                                {% endif %}
+                            </td>
+                            <td>
+                               <a href="{% url 'laboratorios:actualizar' laboratorio.pk %}" class="btn btn-xs btn-info">Actualizar</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock contenido_panel %}

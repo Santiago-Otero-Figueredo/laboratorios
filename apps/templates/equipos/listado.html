@@ -1,0 +1,71 @@
+{% extends "base_tablas.html" %}
+
+{% load bootstrap4 %}
+
+{% block titulo %}
+    Listado de equipos
+{% endblock titulo %}
+
+{% block miga_pan %}
+    <li class="breadcrumb-item"><a href="javascript:;">Equipos</a></li>
+    <li class="breadcrumb-item active"><a href="javascript:;">Listado</a></li>
+{% endblock miga_pan %}
+
+{% block titulo_pagina %}
+    Listado de equipos
+{% endblock titulo_pagina %}
+
+{% block titulo_panel %}
+    Listado de equipos
+{% endblock titulo_panel %}
+
+{% block contenido_panel %}
+    <div class="row">
+        <div class="col-12 m-t-10">
+            <table class="table table-hover table-responsive datatable">
+                <thead>
+                    <tr>
+                        <th># Serial</th>
+                        <th>Tipo</th>
+                        <th>Laboratorio</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for equipo in equipos %}
+                        <tr>
+                            <td>
+                                {{equipo.serial}}
+                            </td>
+                            <td>
+                                {{equipo.tipo_equipo}}
+                            </td>
+                            <td>
+                                {% if equipo.laboratorio is None %}
+                                    <label class="text-warning">Sin laboratorio asignado</label>
+                                {% else %}
+                                    <label class="text-info">{{equipo.laboratorio}}</label>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if equipo.activa %}
+                                    <label class="text-success">Activo</label>
+                                {% else %}
+                                    <label class="text-danger" >Inactivo</label>
+                                {% endif %}
+                            </td>
+                            <td>
+                               <a href="{% url 'equipos:actualizar' equipo.pk %}" class="btn btn-xs btn-info">Actualizar</a>
+                               <a href="{% url 'equipos:listado_informacion' equipo.pk %}" class="btn btn-xs btn-info">información adicional</a>
+
+
+
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock contenido_panel %}

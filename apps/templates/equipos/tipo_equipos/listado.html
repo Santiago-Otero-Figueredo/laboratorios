@@ -1,0 +1,64 @@
+{% extends "base_tablas.html" %}
+
+{% load bootstrap4 %}
+
+{% block titulo %}
+    Listado de tipos equipos
+{% endblock titulo %}
+
+{% block miga_pan %}
+    <li class="breadcrumb-item"><a href="javascript:;">Equipos</a></li>
+    <li class="breadcrumb-item"><a href="javascript:;">Tipos</a></li>
+    <li class="breadcrumb-item active"><a href="javascript:;">Listado</a></li>
+{% endblock miga_pan %}
+
+{% block titulo_pagina %}
+    Listado de tipos equipos
+{% endblock titulo_pagina %}
+
+{% block titulo_panel %}
+    Listado de tipos equipos
+{% endblock titulo_panel %}
+
+{% block contenido_panel %}
+    <div class="row">
+        <div class="col-12 m-t-10">
+            <table class="table table-hover table-responsive datatable">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Campos extra</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tipo in tipo_equipos %}
+                        <tr>
+                            <td>
+                                {{tipo.nombre}}
+                            </td>
+                            <td>
+                                {% for campo in tipo.campos_extra.all%}
+                                    <span class="text-info badge">{{campo.nombre}}</span>
+                                {% empty %}
+                                    <span class="text-warning"><b>No tiene campos extra asociados</b></span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% if tipo.activa %}
+                                    <label class="text-success">Activo</label>
+                                {% else %}
+                                    <label class="text-danger" >Inactivo</label>
+                                {% endif %}
+                            </td>
+                            <td>
+                               <a href="{% url 'equipos:actualizar_tipo' tipo.pk %}" class="btn btn-xs btn-info">Actualizar</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock contenido_panel %}

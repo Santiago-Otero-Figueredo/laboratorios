@@ -1,0 +1,61 @@
+{% extends "base_tablas.html" %}
+
+{% load bootstrap4 %}
+
+{% block titulo %}
+    Listado de cursos de programa en el periodo académico {{periodo}}
+{% endblock titulo %}
+
+{% block miga_pan %}
+    <li class="breadcrumb-item"><a href="javascript:;">Periodo académico {{periodo}}</a></li>
+    <li class="breadcrumb-item"><a href="javascript:;">Cursos del programa</a></li>
+    <li class="breadcrumb-item active"><a href="javascript:;">Listado</a></li>
+{% endblock miga_pan %}
+
+{% block titulo_pagina %}
+    Listado de cursos de programa en el periodo académico {{periodo}}
+{% endblock titulo_pagina %}
+
+{% block titulo_panel %}
+    Listado de cursos de programa en el periodo académico {{periodo}}
+{% endblock titulo_panel %}
+
+{% block contenido_panel %}
+    <div class="row">
+        <div class="col-12 m-t-10">
+            <table class="table table-hover table-responsive datatable">
+                <thead>
+                    <tr>
+                        <th>Curso del programa</th>
+                        <th>Periodo académico</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grupo in periodos_cursos %}
+                        <tr>
+                            <td>
+                                {{grupo.curso_programa}}
+                            </td>
+                            <td>
+                                {{grupo.periodo_academico}}
+                            </td>
+                            <td>
+                                {% if grupo.activa %}
+                                    <label class="text-success">Activo</label>
+                                {% else %}
+                                    <label class="text-danger" >Inactivo</label>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-xs btn-info">Asignar practica laboratorio</a>
+                             </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+{% endblock contenido_panel %}

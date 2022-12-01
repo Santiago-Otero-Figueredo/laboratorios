@@ -1,0 +1,79 @@
+{% url 'equipos:listado' as listado_equipos %}
+{% url 'equipos:registro' as registro_equipo %}
+
+{% url 'equipos:listado_tipos' as listado_tipos %}
+{% url 'equipos:registro_tipo' as registro_tipo %}
+
+{% url 'equipos:listado_campos' as listado_campos %}
+{% url 'equipos:registro_campo' as registro_campo %}
+
+<div class="menu-item has-sub  {% if 'equipos/' in request.path %}active{% endif %}" id="menu_equipos">
+    <a href="javascript:;" class="menu-link">
+        <div class="menu-icon">
+            <i class="fa fa-thermometer-empty"></i>
+        </div>
+        <div class="menu-text">Equipos</div>
+        <div class="menu-caret"></div>
+    </a>
+        <div class="menu-submenu">
+            <div class="menu-item has-sub {% if listado_equipos == request.path or registro_equipo == request.path %}active expand{% else %}closed{% endif %}">
+                <a href="javascript:;" class="menu-link">
+                    <i class=""></i>
+                    <span>Equipos</span>
+                    <div class="menu-caret"></div>
+                </a>
+                <div class="menu-submenu">
+                    <div class="menu-item {% if listado_equipos in request.path %}active{% endif %}">
+                        <a href="{{listado_equipos}}" class="menu-link">
+                            <div class="menu-text">Listado</div>
+                        </a>
+                    </div>
+                    <div class="menu-item {% if registro_equipo in request.path %}active{% endif %}">
+                        <a href="{{registro_equipo}}" class="menu-link">
+                            <div class="menu-text">Registro</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-item has-sub {% if listado_tipos == request.path or registro_tipo == request.path %}active expand{% else %}closed{% endif %}">
+                <a href="javascript:;" class="menu-link">
+                    <i class=""></i>
+                    <span>Tipos</span>
+                    <div class="menu-caret"></div>
+                </a>
+                <div class="menu-submenu">
+                    <div class="menu-item {% if listado_tipos in request.path %}active{% endif %}">
+                        <a href="{{listado_tipos}}" class="menu-link">
+                            <div class="menu-text">Listado</div>
+                        </a>
+                    </div>
+                    <div class="menu-item {% if registro_tipo in request.path %}active{% endif %}">
+                        <a href="{{registro_tipo}}" class="menu-link">
+                            <div class="menu-text">Registro</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-item has-sub {% if listado_campos == request.path or registro_campo == request.path %}active expand{% else %}closed{% endif %}">
+                <a href="javascript:;" class="menu-link">
+                    <i class=""></i>
+                    <span>Campos extra</span>
+                    <div class="menu-caret"></div>
+                </a>
+                <div class="menu-submenu">
+                    <div class="menu-item {% if listado_campos in request.path %}active{% endif %}">
+                        <a href="{{listado_campos}}" class="menu-link">
+                            <div class="menu-text">Listado</div>
+                        </a>
+                    </div>
+                    <div class="menu-item {% if registro_campo in request.path %}active{% endif %}">
+                        <a href="{{registro_campo}}" class="menu-link">
+                            <div class="menu-text">Registro</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+    </div>
+</div>

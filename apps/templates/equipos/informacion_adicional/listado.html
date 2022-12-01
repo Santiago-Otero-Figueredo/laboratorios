@@ -1,0 +1,69 @@
+{% extends "base_tablas.html" %}
+
+{% load bootstrap4 %}
+
+{% block titulo %}
+    Listado información adicional del equipo: {{equipo}} - {{equipo.tipo_equipo}}
+{% endblock titulo %}
+
+{% block miga_pan %}
+    <li class="breadcrumb-item"><a href="javascript:;">Equipos</a></li>
+    <li class="breadcrumb-item"><a href="javascript:;">{{equipo}} - {{equipo.tipo_equipo}}</a></li>
+    <li class="breadcrumb-item"><a href="javascript:;">Información adicional</a></li>
+    <li class="breadcrumb-item active"><a href="javascript:;">Listado</a></li>
+{% endblock miga_pan %}
+
+{% block titulo_pagina %}
+    Listado información adicional del equipo: {{equipo}} - {{equipo.tipo_equipo}}
+{% endblock titulo_pagina %}
+
+{% block titulo_panel %}
+    Listado información adicional del equipo: {{equipo}} - {{equipo.tipo_equipo}}
+{% endblock titulo_panel %}
+
+{% block contenido_panel %}
+    <div class="row">
+        <div class="mb-3" align="right">
+            <a href="{% url 'equipos:registro_informacion' equipo.pk %}" class="btn btn-principal">Registrar información</a>
+        </div>
+        <div class="col-12 m-t-10">
+            <table class="table table-hover table-responsive datatable">
+                <thead>
+                    <tr>
+                        <th>Campo extra</th>
+                        <th>Valor</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for informacion in informacion_adicional %}
+                        <tr>
+                            <td>
+                                {{informacion.campo_extra_tipo.campo_extra.nombre}}
+                            </td>
+                            <td>
+                                {{informacion.valor}}
+                            </td>
+                            <td>
+                                {% if informacion.activa %}
+                                    <label class="text-success">Activo</label>
+                                {% else %}
+                                    <label class="text-danger" >Inactivo</label>
+                                {% endif %}
+                            </td>
+                            <td>
+                               <a href="{% url 'equipos:actualizar_informacion' informacion.pk %}" class="btn btn-xs btn-info">Actualizar</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="col-6">
+                <a class="btn btn-secondary" href="{% url 'equipos:listado' %}">
+                    <i class="icon-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock contenido_panel %}

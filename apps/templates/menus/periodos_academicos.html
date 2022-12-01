@@ -1,0 +1,19 @@
+{% url 'periodos_academicos:listado_cursos_programa' as listado_cursos_programa %}
+
+
+<div class="menu-item has-sub  {% if listado_cursos_programa in request.path %}active{% endif %}" id="menu_cursos_programa">
+    <a href="javascript:;" class="menu-link">
+        <div class="menu-icon">
+            <i class="fa fa-university"></i>
+        </div>
+        <div class="menu-text">Cursos programa</div>
+        <div class="menu-caret"></div>
+    </a>
+    <div class="menu-submenu">
+        <div class="menu-item {% if listado_cursos_programa in request.path %}active{% endif %}">
+            <a href="{{listado_cursos_programa}}" class="menu-link">
+                <div class="menu-text">Listado</div>
+            </a>
+        </div>
+    </div>
+</div>

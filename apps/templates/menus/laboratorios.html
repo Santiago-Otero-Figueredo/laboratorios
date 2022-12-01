@@ -1,0 +1,56 @@
+{% url 'laboratorios:listado' as listado_laboratorios %}
+{% url 'laboratorios:registro' as registro_laboratorio %}
+
+{% url 'laboratorios:listado_practicas' as listado_practicas %}
+{% url 'laboratorios:registro_practica' as registro_practica %}
+
+<div class="menu-item has-sub  {% if listado_laboratorios in request.path or registro_laboratorio in request.path or listado_practicas in request.path or registro_practica in request.path %}active{% endif %}" id="menu_laboratorios">
+    <a href="javascript:;" class="menu-link">
+        <div class="menu-icon">
+            <i class="fa fa fa-flask"></i>
+        </div>
+        <div class="menu-text">Laboratorios</div>
+        <div class="menu-caret"></div>
+    </a>
+    <div class="menu-submenu">
+        <div class="menu-item has-sub {% if listado_laboratorios == request.path or registro_laboratorio == request.path %}active expand{% else %}closed{% endif %}">
+            <a href="javascript:;" class="menu-link">
+                <i class=""></i>
+                <span>Laboratorios</span>
+                <div class="menu-caret"></div>
+            </a>
+            <div class="menu-submenu">
+                <div class="menu-item {% if listado_laboratorios in request.path %}active{% endif %}">
+                    <a href="{{listado_laboratorios}}" class="menu-link">
+                        <div class="menu-text">Listado</div>
+                    </a>
+                </div>
+                <div class="menu-item {% if registro_laboratorio in request.path %}active{% endif %}">
+                    <a href="{{registro_laboratorio}}" class="menu-link">
+                        <div class="menu-text">Registro</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-item has-sub {% if listado_practicas == request.path or registro_practica == request.path %}active expand{% else %}closed{% endif %}">
+            <a href="javascript:;" class="menu-link">
+                <i class=""></i>
+                <span>Practicas</span>
+                <div class="menu-caret"></div>
+            </a>
+            <div class="menu-submenu">
+                <div class="menu-item {% if listado_practicas in request.path %}active{% endif %}">
+                    <a href="{{listado_practicas}}" class="menu-link">
+                        <div class="menu-text">Listado</div>
+                    </a>
+                </div>
+                <div class="menu-item {% if registro_practica in request.path %}active{% endif %}">
+                    <a href="{{registro_practica}}" class="menu-link">
+                        <div class="menu-text">Registro</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
