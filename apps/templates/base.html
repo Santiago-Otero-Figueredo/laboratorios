@@ -13,6 +13,7 @@
     <link rel="shortcut icon" href="{{MEDIA_URL}}{{request.tenant.configuracion.favicon}}" type="image/x-icon">
     <link rel="icon" href="{{MEDIA_URL}}{{request.tenant.configuracion.favicon}}" type="image/x-icon">
 
+
     <!-- ================== CALENDARIO ================== -->
     <link href="{% static 'plugins/@fullcalendar/common/main.min.css'%}" rel="stylesheet" />
     <link href="{% static 'plugins/@fullcalendar/daygrid/main.min.css'%}" rel="stylesheet" />
@@ -194,25 +195,8 @@
     <script src="{% static 'plugins/@fullcalendar/interaction/main.global.js'%}"></script>
     <script src="{% static 'plugins/@fullcalendar/list/main.global.js'%}"></script>
     <script src="{% static 'plugins/@fullcalendar/bootstrap/main.global.js'%}"></script>
-    <script src="{% static 'js/custom/calendario_timeline.js'%}"></script>
 
-    <script>
 
-        var Calendario = function () {
-            "use strict";
-            return {
-                //main function
-                init: function () {
-                    calendarioTimeLine();
-                }
-            };
-        }();
-
-        $(document).ready(function() {
-            Calendario.init();
-        });
-
-    </script>
     <!-- ================== FIN CALENDARIO ================== -->
 
 

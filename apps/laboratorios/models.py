@@ -2,12 +2,17 @@ from django.db import models
 from django.db.models import QuerySet
 from django.core.validators import MinValueValidator
 
+from typing import List, Tuple
 
 from apps.core.models import ModeloBase
+
+from apps.core.utils import normalizar_nombres
+
+import pandas as pd
 # Create your models here.
 
 class Laboratorio(ModeloBase):
-    nombre = models.CharField(max_length=60, verbose_name="Nombre del laboratorio")
+    nombre = models.CharField(max_length=255, verbose_name="Nombre del laboratorio", unique=True)
     descripcion = models.TextField(verbose_name="Descripción", default="", blank=True)
 
     def __str__(self) -> str:
@@ -23,8 +28,28 @@ class Laboratorio(ModeloBase):
 
         return self.equipo_laboratorio_asignado.filter(equipo__pk=id_equipo)
 
+    @staticmethod
+    def validar_registro_masivo(df_laboratorios: pd.DataFrame) -> Tuple[bool, str, List[str]]:
+        import re
 
 
+        laboratorios_nuevos = set(df_laboratorios.laboratorio.unique())
+        laboratorios_nuevos = set(map(normalizar_nombres, laboratorios_nuevos)) #Eliminando espacios en blanco
+        laboratorios_actuales = set(Laboratorio.obtener_todos().values_list('nombre', flat=True))
+
+        if laboratorios_nuevos & laboratorios_actuales:
+            return False, 'Hay laboratorios ya registrados', laboratorios_actuales
+
+        return True, 'Los datos están correctos', laboratorios_nuevos
+
+    @staticmethod
+    def registro_masivo(df_laboratorios: pd.DataFrame) -> None:
+
+        resultado, mensaje, datos = Laboratorio.validar_registro_masivo(df_laboratorios)
+
+        if resultado:
+            for laboratorio in datos:
+                Laboratorio.objects.create(nombre=laboratorio.strip())
 
 class PracticaLaboratorio(ModeloBase):
     laboratorio = models.ForeignKey(
@@ -54,10 +79,14 @@ class PracticaLaboratorio(ModeloBase):
         return f'{self.laboratorio} - {self.grupo}'
 
     @staticmethod
+    def agendadas_por_laboratorio(id_laboratorio: int) -> 'QuerySet[PracticaLaboratorio]':
+
+        return PracticaLaboratorio.obtener_activos().filter(laboratorio__pk=id_laboratorio)
+
+    @staticmethod
     def agendadas_por_laboratorio_en_rango__fechas(id_laboratorio: int, fecha_inicio: 'datetime', fecha_fin:'datetime') -> 'QuerySet[PracticaLaboratorio]':
 
-        return PracticaLaboratorio.objects.filter(
-                laboratorio__pk=id_laboratorio,
+        return PracticaLaboratorio.agendadas_por_laboratorio(laboratorio__pk=id_laboratorio).filter(
                 fecha_inicio__lt=fecha_fin,
                 fecha_fin__gt=fecha_inicio
             )

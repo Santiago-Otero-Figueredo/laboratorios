@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load bootstrap4 %}
+
+{% block titulo %}
+    Registrar masivo laboratorio
+{% endblock titulo %}
+
+{% block titulo_pagina %}
+    Registrar masivo laboratorio
+{% endblock titulo_pagina %}
+
+{% block miga_pan %}
+    <li class="breadcrumb-item"><a href="javascript:;">Laboratorio</a></li>
+    <li class="breadcrumb-item active">Registro masivo</li>
+{% endblock miga_pan %}
+
+{% block titulo_panel %}
+    Registrar masivo laboratorio
+{% endblock titulo_panel %}
+
+{% block contenido_panel %}
+    <div class="row">
+        <div class="col-12">
+            Registrar la información de un varios laboratorios con los datos que esta en el archivo cargado
+        </div>
+    </div>
+    <form method="post" enctype="multipart/form-data" autocomplete="off">{% csrf_token %}
+        <div class="row mt-3">
+            <div class="col-12">
+                {% bootstrap_form form %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <a class="btn btn-secondary" href="{% url 'laboratorios:listado' %}">
+                    <i class="icon-arrow-left"></i> Volver
+                </a>
+            </div>
+            <div class="col-6" align="right">
+                <button class="btn btn-principal" type="submit">
+                    Registrar <i class="icon-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+{% endblock contenido_panel %}

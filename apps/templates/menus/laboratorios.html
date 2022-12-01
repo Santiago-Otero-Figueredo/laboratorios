@@ -1,10 +1,14 @@
 {% url 'laboratorios:listado' as listado_laboratorios %}
 {% url 'laboratorios:registro' as registro_laboratorio %}
+{% url 'laboratorios:registro_masivo' as registro_masivo %}
+
+
+
 
 {% url 'laboratorios:listado_practicas' as listado_practicas %}
 {% url 'laboratorios:registro_practica' as registro_practica %}
 
-<div class="menu-item has-sub  {% if listado_laboratorios in request.path or registro_laboratorio in request.path or listado_practicas in request.path or registro_practica in request.path %}active{% endif %}" id="menu_laboratorios">
+<div class="menu-item has-sub  {% if listado_laboratorios in request.path or registro_laboratorio in request.path or registro_masivo == request.path or listado_practicas in request.path or registro_practica in request.path %}active{% endif %}" id="menu_laboratorios">
     <a href="javascript:;" class="menu-link">
         <div class="menu-icon">
             <i class="fa fa fa-flask"></i>
@@ -13,7 +17,7 @@
         <div class="menu-caret"></div>
     </a>
     <div class="menu-submenu">
-        <div class="menu-item has-sub {% if listado_laboratorios == request.path or registro_laboratorio == request.path %}active expand{% else %}closed{% endif %}">
+        <div class="menu-item has-sub {% if listado_laboratorios == request.path or registro_laboratorio == request.path or registro_masivo == request.path %}active expand{% else %}closed{% endif %}">
             <a href="javascript:;" class="menu-link">
                 <i class=""></i>
                 <span>Laboratorios</span>
@@ -28,6 +32,11 @@
                 <div class="menu-item {% if registro_laboratorio in request.path %}active{% endif %}">
                     <a href="{{registro_laboratorio}}" class="menu-link">
                         <div class="menu-text">Registro</div>
+                    </a>
+                </div>
+                <div class="menu-item {% if registro_masivo in request.path %}active{% endif %}">
+                    <a href="{{registro_masivo}}" class="menu-link">
+                        <div class="menu-text">Registro masivo</div>
                     </a>
                 </div>
             </div>

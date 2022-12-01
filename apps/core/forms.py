@@ -16,6 +16,7 @@ class ModelSelect2WidgetConfigurable(forms.ModelChoiceField):
             }
         )
 
+
 class ModelSelect2MultipleWidgetConfigurable(forms.ModelMultipleChoiceField):
 
     def __init__(self, model, search_fields=[], *args, **kwargs) -> None:
@@ -29,3 +30,7 @@ class ModelSelect2MultipleWidgetConfigurable(forms.ModelMultipleChoiceField):
                 'data-minimum-input-length':0
             }
         )
+
+
+class FormRegistroMasivo(forms.Form):
+    archivo = forms.FileField()

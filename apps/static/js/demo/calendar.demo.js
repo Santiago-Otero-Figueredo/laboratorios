@@ -18,9 +18,9 @@ var handleCalendarDemo = function() {
       };
     }
   });
-  
+
   // fullcalendar
-  
+
   var d = new Date();
 	var month = d.getMonth() + 1;
 	    month = (month < 10) ? '0' + month : month;
@@ -43,6 +43,7 @@ var handleCalendarDemo = function() {
     initialView: 'dayGridMonth',
     editable: true,
     droppable: true,
+
   	themeSystem: 'bootstrap',
 		views: {
 			timeGrid: {
@@ -126,7 +127,7 @@ var handleCalendarDemo = function() {
 			color: app.color.blue
 		}]
   });
-  
+
 	calendar.render();
 };
 

@@ -1,5 +1,7 @@
 {% extends "base.html" %}
+
 {% load bootstrap4 %}
+{% load static %}
 
 {% block titulo %}
     {%if object %}Modificar practica de laboratorio - {{object}}{%else%}Registrar practica laboratorio{%endif%}
@@ -25,23 +27,61 @@
             {%if object %}Modificar {{object}}{%else%}Registrar{%endif%} la información de una practica de laboratorio
         </div>
     </div>
-    <form method="post" autocomplete="off">{% csrf_token %}
-        <div class="row mt-3">
-            <div class="col-12">
-                {% bootstrap_form form %}
+    <div>
+        {{practicas_registradas}}
+        <form method="post" autocomplete="off">{% csrf_token %}
+            <div class="row mt-3">
+                <div class="col-12">
+                    {% bootstrap_form form %}
+                </div>
             </div>
+            <div class="row">
+                <div class="col-6">
+                    <a class="btn btn-secondary" href="{% url 'laboratorios:listado_practicas' %}">
+                        <i class="icon-arrow-left"></i> Volver
+                    </a>
+                </div>
+                <div class="col-6" align="right">
+                    <button class="btn btn-principal" type="submit">
+                        {%if object %}Modificar {%else%}Registrar practica {%endif%}<i class="icon-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-lg px-5 py-5" >
+        <div id="calendar" class="calendar fc fc-media-screen fc-direction-ltr fc-theme-bootstrap" style="overflow-y: scroll;">
+
         </div>
-        <div class="row">
-            <div class="col-6">
-                <a class="btn btn-secondary" href="{% url 'laboratorios:listado_practicas' %}">
-                    <i class="icon-arrow-left"></i> Volver
-                </a>
-            </div>
-            <div class="col-6" align="right">
-                <button class="btn btn-principal" type="submit">
-                    {%if object %}Modificar {%else%}Registrar practica {%endif%}<i class="icon-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-    </form>
+    </div>
+
+
 {% endblock contenido_panel %}
+
+{% block js %}
+    {{block.super}}
+    <script src="{% static 'js/custom/calendario_timeline.js'%}"></script>
+    <script>
+        let eventos = {{practicas_registradas|safe}}
+
+        var Calendario = function () {
+            "use strict";
+            return {
+                //main function
+                init: function () {
+                    calendarioTimeLine(eventos=eventos);
+                }
+            };
+        }();
+
+        $(document).ready(function() {
+            Calendario.init();
+        });
+
+    </script>
+    <script>
+        $("#id_laboratorio").on("change", function () {
+            id_laboratorio_seleccionado = $(this).val();
+        });
+    </script>
+{% endblock js %}

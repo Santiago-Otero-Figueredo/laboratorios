@@ -100,29 +100,3 @@
 .gritter-light .gritter-title {
     text-shadow: none;
 }
-
-
-body #gritter-notice-wrapper .gritter-item-wrapper.gritter-error{
-	background-color: #BD362F;
-	color: white;
-}
-body #gritter-notice-wrapper .gritter-item-wrapper.gritter-success{
-	background-color: #51A351;
-	color: white;
-}
-body #gritter-notice-wrapper .gritter-item-wrapper.gritter-warning{
-	background-color: #F89406;
-	color: white;
-}
-body #gritter-notice-wrapper .gritter-item-wrapper.gritter-info{
-	background-color: #2F96B4;
-	color: white;
-}
-
-body #gritter-notice-wrapper .gritter-item-wrapper .gritter-item .gritter-title{
-	color: white;
-}
-
-body #gritter-notice-wrapper .gritter-item-wrapper .gritter-item p{
-	color: white;
-}
