@@ -4,7 +4,10 @@ from abc import ABCMeta, abstractmethod
 import pandas as pd
 import numpy as np
 import unicodedata
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict, List, Union
+
+from apps.core.utils import normalizar_nombres
+
 
 def normalizar_texto(input_str: str) -> str:
     input_str = input_str.lower()
@@ -46,12 +49,19 @@ class LecturaArchivos(metaclass=ABCMeta):
 
 class LecturaExcelPandas(LecturaArchivos):
 
-    def __init__(self, archivo, columnas_esperadas=[], prohibir_celdas_vacias=False, prohibir_columnas_vacias=False, *args, **kwargs):
+    def __init__(self, archivo, columnas_esperadas=[],
+        prohibir_celdas_vacias=False, prohibir_columnas_vacias=False,
+        modelo=None, columnas_a_normalizar=[], columnas_ignorar=[], *args, **kwargs):
+
         super().__init__(archivo, *args, **kwargs)
 
-        self.columnas_esperadas = {normalizar_texto(item) for item in columnas_esperadas} #Convierto los elementos a minúscula y quito acentos
+        self.columnas_esperadas = set(map(normalizar_texto, columnas_esperadas)) # Convierto los elementos a minúscula y quito acentos
         self.prohibir_celdas_vacias = prohibir_celdas_vacias
         self.prohibir_columnas_vacias = prohibir_columnas_vacias
+        self.modelo = modelo
+        self.datos_normalizados = pd.DataFrame()
+        self.columnas_a_normalizar = list(set(map(normalizar_texto, columnas_a_normalizar))) # Convierto los elementos a minúscula y quito acentos
+        self.columnas_ignorar = columnas_ignorar
 
         self._leer_archivo(self.ruta_archivo)
         self._validar_datos()
@@ -70,13 +80,16 @@ class LecturaExcelPandas(LecturaArchivos):
         if self.prohibir_columnas_vacias:
            self.datos.dropna(how='all', axis='columns', inplace=True) # Eliminar columnas na
         self.datos.dropna(how='all', axis='index', inplace=True) # Eliminar filas na
+
+        if self.columnas_ignorar:
+            self.datos.drop(self.columnas_ignorar, axis=1, inplace=True)
+
         self._remplazar_na()
 
 
-    def _validar_datos(self):
-        if not self.columnas_esperadas:
-            return True, "El archivo no presenta errores"
-        else:
+    def _validar_datos(self) -> None:
+
+        if len(self.columnas_esperadas) > 0:
             total_datos = self.datos.shape[0]
 
             if total_datos == 0:  # no hay registros de estudiantes
@@ -94,16 +107,32 @@ class LecturaExcelPandas(LecturaArchivos):
             columnas_en_df = set(self.datos.columns)
 
             if len(self.columnas_esperadas & columnas_en_df) != len(self.columnas_esperadas):
-                self.errores.append({'datos':'Lo nombres de las columnas no coinciden'})
+                self.errores.append({'datos':'Los nombres de las columnas no coinciden'})
 
-            if len(self.errores) != 0:
-                return False, self.errores
-            else:
-                return True, "El archivo no presenta errores"
+            if self.modelo:
 
-    def _obtener_datos_cargados(self) -> Tuple[bool, pd.DataFrame, list]:
+                datos_normalizados = self.datos.copy()
+                if self.columnas_a_normalizar:
+                    if self.columnas_esperadas.intersection(self.columnas_a_normalizar):
+                        datos_normalizados = datos_normalizados[self.columnas_a_normalizar].applymap(lambda x:normalizar_nombres(x), na_action='ignore')
+                    else:
+                        self.errores.append({'normalizacion':'Las columnas a normalizar no existen el el archivo'})
+
+                validacion_modelo = self.modelo.validar_registro_masivo(datos_normalizados)
+                resultado = validacion_modelo['resultado']
+                errores_modelo = validacion_modelo['errores']
+                datos = validacion_modelo['datos']
+
+                if resultado:
+                    self.datos_normalizados = datos
+
+                self.errores.extend(errores_modelo) # Añado los elementos para ser parte de la lista, no los agrego asi evito una lista vacía dentro de la lista errores
+
+
+    def _obtener_datos_cargados(self) -> Dict[str, Union[bool, pd.DataFrame, List[str]]]:
+        respuesta = {'resultado':True, 'datos':self.datos, 'errores':self.errores}
         if len(self.errores) != 0:
-            return False, None, self.errores
-        return True, self.datos, self.errores
+            respuesta.update({'resultado':False, 'datos':None})
+        return respuesta
 
 

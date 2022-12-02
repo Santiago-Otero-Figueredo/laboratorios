@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import QuerySet
 from django.core.validators import MinValueValidator
 
-from typing import List, Tuple
+from typing import List, Dict, Union
 
 from apps.core.models import ModeloBase
 
@@ -29,23 +29,32 @@ class Laboratorio(ModeloBase):
         return self.equipo_laboratorio_asignado.filter(equipo__pk=id_equipo)
 
     @staticmethod
-    def validar_registro_masivo(df_laboratorios: pd.DataFrame) -> Tuple[bool, str, List[str]]:
-        import re
+    def validar_registro_masivo(df_laboratorios: pd.DataFrame) -> Dict[str, Union[bool, str, List[str]]]:
 
+        mensajes_error = []
 
         laboratorios_nuevos = set(df_laboratorios.laboratorio.unique())
-        laboratorios_nuevos = set(map(normalizar_nombres, laboratorios_nuevos)) #Eliminando espacios en blanco
+        laboratorios_nuevos = set(map(normalizar_nombres, laboratorios_nuevos)) # Eliminando caracteres \-\.\n\t
+
+        respuesta = {'resultado':True, 'errores':[], 'datos':laboratorios_nuevos}
+
         laboratorios_actuales = set(Laboratorio.obtener_todos().values_list('nombre', flat=True))
 
         if laboratorios_nuevos & laboratorios_actuales:
-            return False, 'Hay laboratorios ya registrados', laboratorios_actuales
+            mensajes_error.append({'modelo':'Hay laboratorios ya registrados'})
 
-        return True, 'Los datos están correctos', laboratorios_nuevos
+        if len(mensajes_error) > 0:
+            respuesta.update({'resultado':False, 'errores':mensajes_error})
+
+        return respuesta
+
 
     @staticmethod
     def registro_masivo(df_laboratorios: pd.DataFrame) -> None:
 
-        resultado, mensaje, datos = Laboratorio.validar_registro_masivo(df_laboratorios)
+        respuesta = Laboratorio.validar_registro_masivo(df_laboratorios)
+        resultado = respuesta['resultado']
+        datos = respuesta['datos']
 
         if resultado:
             for laboratorio in datos:
@@ -86,7 +95,7 @@ class PracticaLaboratorio(ModeloBase):
     @staticmethod
     def agendadas_por_laboratorio_en_rango__fechas(id_laboratorio: int, fecha_inicio: 'datetime', fecha_fin:'datetime') -> 'QuerySet[PracticaLaboratorio]':
 
-        return PracticaLaboratorio.agendadas_por_laboratorio(laboratorio__pk=id_laboratorio).filter(
+        return PracticaLaboratorio.agendadas_por_laboratorio(id_laboratorio).filter(
                 fecha_inicio__lt=fecha_fin,
                 fecha_fin__gt=fecha_inicio
             )
@@ -109,6 +118,7 @@ class EquipoPracticaLaboratorio(ModeloBase):
 
     def __str__(self) -> str:
         return f'{self.equipo} - {self.practica_laboratorio} - {self.cantidad}'
+
 
 class Alerta(ModeloBase):
     equipo = models.ForeignKey(

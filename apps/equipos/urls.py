@@ -7,6 +7,7 @@ from apps.equipos.views import (
 
     ListadoTipoEquipos,
     RegistroTipoEquipo,
+    RegistroMasivoTiposEquipos,
     ActualizarTipoEquipo,
 
     ListadoCamposExtra,
@@ -28,6 +29,7 @@ urlpatterns = [
 
     path("tipos/listado", ListadoTipoEquipos.as_view(), name="listado_tipos"),
     path("tipos/registro", RegistroTipoEquipo.as_view(), name="registro_tipo"),
+    path("tipos/registro/masivo", RegistroMasivoTiposEquipos.as_view(), name="registro_masivo_tipo"),
     path("tipos/actualizar/<int:id_tipo_equipo>", ActualizarTipoEquipo.as_view(), name="actualizar_tipo"),
 
     path("campos/listado", ListadoCamposExtra.as_view(), name="listado_campos"),
@@ -37,5 +39,4 @@ urlpatterns = [
     path("informacion-adicional/<int:id_equipo>/listado", ListadoInformacionAdicionalEquipos.as_view(), name="listado_informacion"),
     path("informacion-adicional/<int:id_equipo>/registro", RegistroInformacionAdicionalEquipo.as_view(), name="registro_informacion"),
     path("informacion-adicional/actualizar/<int:id_informacion_adicional>", ActualizarInformacionAdicionalEquipo.as_view(), name="actualizar_informacion"),
-
 ]

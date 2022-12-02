@@ -56,4 +56,8 @@ class FormPracticaLaboratorio(forms.ModelForm):
             self.add_error('fecha_inicio', mensaje)
             self.add_error('fecha_fin', mensaje)
 
+        if fecha_inicio > fecha_fin:
+            mensaje = f'La fecha final no puede ser antes que la inicial'
+            self.add_error('fecha_fin', mensaje)
+
         return super().clean()

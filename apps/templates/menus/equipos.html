@@ -1,5 +1,7 @@
 {% url 'equipos:listado' as listado_equipos %}
 {% url 'equipos:registro' as registro_equipo %}
+{% url 'equipos:registro_masivo_tipo' as registro_masivo_tipo %}
+
 
 {% url 'equipos:listado_tipos' as listado_tipos %}
 {% url 'equipos:registro_tipo' as registro_tipo %}
@@ -48,6 +50,11 @@
                             <div class="menu-text">Listado</div>
                         </a>
                     </div>
+                    <div class="menu-item {% if registro_masivo_tipo in request.path %}active{% endif %}">
+                        <a href="{{registro_masivo_tipo}}" class="menu-link">
+                            <div class="menu-text">Registro masivo</div>
+                        </a>
+                    </div>
                     <div class="menu-item {% if registro_tipo in request.path %}active{% endif %}">
                         <a href="{{registro_tipo}}" class="menu-link">
                             <div class="menu-text">Registro</div>
@@ -55,6 +62,7 @@
                     </div>
                 </div>
             </div>
+
 
             <div class="menu-item has-sub {% if listado_campos == request.path or registro_campo == request.path %}active expand{% else %}closed{% endif %}">
                 <a href="javascript:;" class="menu-link">

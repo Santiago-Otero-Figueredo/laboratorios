@@ -30,19 +30,20 @@ class RegistroMasivoLaboratorios(FormView):
 
     def form_valid(self, form):
         archivo = form.cleaned_data['archivo']
-        print("############ ARCHIVO CARGADO ###########")
         gestor_archivo = LecturaExcelPandas(
             archivo=archivo,
             columnas_esperadas=['LABORATORIO'],
-            prohibir_celdas_vacias=True
+            prohibir_celdas_vacias=True,
+            modelo=Laboratorio,
+            columnas_a_normalizar=['LABORATORIO']
         )
 
-        resultado, datos, errores = gestor_archivo._obtener_datos_cargados()
-        if resultado is False:
-            messages.error(self.request, f'Fallo al cargar los datos {errores}')
+        respuesta = gestor_archivo._obtener_datos_cargados()
+        if respuesta['resultado'] is False:
+            messages.error(self.request, f'Fallo al cargar los datos {respuesta["errores"]}')
             return super().form_invalid(form)
 
-        Laboratorio.registro_masivo(datos)
+        Laboratorio.registro_masivo(respuesta['datos'])
         messages.success(self.request, 'Laboratorios cargados con éxito')
         return super().form_valid(form)
 
@@ -72,12 +73,9 @@ class RegistroPracticasLaboratorio(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         from apps.core.utils import construir_dict_calendario_timeline
-        practicas_registradas = list(PracticaLaboratorio.agendadas_por_laboratorio(1).values("nombre", "fecha_inicio", "fecha_fin"))
-
+        practicas_registradas = list(PracticaLaboratorio.obtener_todos().values("nombre", "fecha_inicio", "fecha_fin"))
 
         practicas_registradas = construir_dict_calendario_timeline(practicas_registradas, {'nombre':'title', 'fecha_inicio':'start', 'fecha_fin':'end'})
-
-
 
         context['practicas_registradas'] = practicas_registradas
         return context

@@ -1,10 +1,14 @@
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView, View
+from django.views.generic import ListView, CreateView, UpdateView, View, FormView
 
 from apps.equipos.models import Equipo, TipoEquipo, CampoExtra, InformacionAdicionalEquipo
 from apps.equipos.forms import FormEquipo, FormTipoEquipo, FormCampoExtra, FormInformacionAdicionalEquipo
+
+from apps.core.classes import LecturaExcelPandas
+from apps.core.forms import FormRegistroMasivo
+
 
 class ListadoEquipos(ListView):
     model = Equipo
@@ -40,6 +44,36 @@ class RegistroTipoEquipo(CreateView):
     form_class = FormTipoEquipo
     success_url = reverse_lazy('equipos:listado_tipos')
 
+class RegistroMasivoTiposEquipos(FormView):
+    template_name = "equipos/tipo_equipos/registro_masivo.html"
+    form_class = FormRegistroMasivo
+    success_url = reverse_lazy('equipos:listado_tipos')
+
+    def form_valid(self, form):
+        archivo = form.cleaned_data['archivo']
+        gestor_archivo = LecturaExcelPandas(
+            archivo=archivo,
+            columnas_esperadas=['NOMBRE_EQUIPO', 'MARCA', 'MODELO', 'SERIE', 'CAPACIDAD',
+                'AMPERAJE', 'PRESION', 'VOLTAJE', 'FABRICANTE', 'FRECUENCIA', 'VELOCIDAD','POTENCIA',
+                'RANGO_1', 'RANGO_2', 'RANGO_3', 'UND_DE_MEDIDA_1', 'UND_DE_MEDIDA_2', 'UND_DE_MEDIDA_3',
+                'EXACTITUD_1', 'EXACTITUD_2', 'EXACTITUD_3', 'RESOLUCION_1', 'RESOLUCION_2', 'RESOLUCION_3'],
+            prohibir_celdas_vacias=False,
+            modelo=TipoEquipo,
+            columnas_a_normalizar=['NOMBRE_EQUIPO'],
+            columnas_ignorar=['No_INVENTARIO', 'ACCESORIOS', 'CODIGO_ACCESORIOS',
+                'UBICACION', 'FECHA_ULTIMO_PROXIMO_MANTENIMIENTO', 'FECHA_ULTIMA_Y_PROXIMA_CALIBRACION']
+        )
+
+        respuesta = gestor_archivo._obtener_datos_cargados()
+        if respuesta['resultado'] is False:
+            messages.error(self.request, f'Fallo al cargar los datos {respuesta["errores"]}')
+            return super().form_invalid(form)
+
+        TipoEquipo.registro_masivo(respuesta['datos'])
+        messages.success(self.request, 'Tipos de equipos cargados con éxito')
+        return super().form_valid(form)
+
+
 
 class ActualizarTipoEquipo(UpdateView):
     model = TipoEquipo
@@ -62,7 +96,6 @@ class RegistroCampoExtra(CreateView):
     template_name = "equipos/campos_extra/registro.html"
     form_class = FormCampoExtra
     success_url = reverse_lazy('equipos:listado_campos')
-
 
 class ActualizarCampoExtra(UpdateView):
     model = CampoExtra

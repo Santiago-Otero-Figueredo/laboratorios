@@ -28,7 +28,6 @@
         </div>
     </div>
     <div>
-        {{practicas_registradas}}
         <form method="post" autocomplete="off">{% csrf_token %}
             <div class="row mt-3">
                 <div class="col-12">
@@ -49,12 +48,39 @@
             </div>
         </form>
     </div>
-    <div class="col-lg px-5 py-5" >
-        <div id="calendar" class="calendar fc fc-media-screen fc-direction-ltr fc-theme-bootstrap" style="overflow-y: scroll;">
 
+
+
+
+    <!-- Trigger the modal with a button -->
+    <div class="row mt-3">
+        <div class="col-6" align="right">
+            <a href="#modal_teme_lime" class="btn btn-principal" data-bs-toggle="modal">Consultar horarios</a>
         </div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="modal_teme_lime">
+        <div class="modal-dialog">
+            <div class="modal-content" style="height: 800px;" >
+                <div class="modal-header">
+                    <h4 class="modal-title">Horarios para practicas en el laboratorio <b>{{laboratorio}}</b></h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="" >
+                        <div id="calendar" class="calendar fc fc-media-screen fc-direction-ltr fc-theme-bootstrap" style="overflow-y: scroll;">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:;" class="btn btn-secundario" data-bs-dismiss="modal">Cancelar</a>
+                    <button id="confirmar" class="btn btn-principal" type="submit">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 {% endblock contenido_panel %}
 
@@ -83,5 +109,6 @@
         $("#id_laboratorio").on("change", function () {
             id_laboratorio_seleccionado = $(this).val();
         });
+
     </script>
 {% endblock js %}
