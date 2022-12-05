@@ -4,6 +4,8 @@ from django.core.validators import MinValueValidator, RegexValidator
 
 from typing import Dict, Union, List, Optional
 
+from apps.laboratorios.models import Laboratorio
+
 from apps.core.models import ModeloBase
 from apps.core.utils import normalizar_nombres
 
@@ -14,6 +16,13 @@ import pandas as pd
 # Create your models here.
 
 class TipoEquipo(ModeloBase):
+
+    REGISTRO_MASIVO_COLUMNAS_IGORAR = [
+        'no_inventario', 'accesorios', 'codigo_accesorios', 'laboratorio',
+        'ubicacion', 'fecha_ultimo_mantenimiento', 'fecha_proximo_mantenimiento',
+        'fecha_ultima_calibracion', 'fecha_proxima_calibracion'
+    ]
+
     campos_extra = models.ManyToManyField(
         'equipos.CampoExtra',
         related_name="tipo_equipos_asociados",
@@ -27,6 +36,13 @@ class TipoEquipo(ModeloBase):
         return f'{self.nombre}'
 
     @staticmethod
+    def obtener_nombres_cargue_masivo_data_frame(df_datos: pd.DataFrame):
+        columnas_df_tipos = list(set(df_datos.columns) - set(TipoEquipo.REGISTRO_MASIVO_COLUMNAS_IGORAR))
+        df_tipos_simplificado = pd.DataFrame(df_datos['nombre_equipo'], columns=columnas_df_tipos)
+
+        return df_tipos_simplificado
+
+    @staticmethod
     def existe_por_nombre(nombre: str) -> bool:
         return TipoEquipo.obtener_todos().filter(nombre=nombre)
 
@@ -38,19 +54,18 @@ class TipoEquipo(ModeloBase):
             return None
 
     @staticmethod
-    def validar_registro_masivo(df_tipos_equipo: pd.DataFrame) -> Dict[str, Union[bool, str, List[str]]]:
+    def validar_registro_masivo(nombres_tipo_equipo: set, prohibir_duplicados: bool=False) -> Dict[str, Union[bool, str, List[str]]]:
 
         mensajes_error = []
 
-        tipos_equipos_nuevos = set(df_tipos_equipo.nombre_equipo.unique())
-        tipos_equipos_nuevos = set(map(normalizar_nombres, tipos_equipos_nuevos)) # Eliminando caracteres \-\.\n\t
+        tipos_equipos_nuevos = set(map(normalizar_nombres, nombres_tipo_equipo)) # Eliminando caracteres \-\.\n\t
 
         respuesta = {'resultado':True, 'errores':[], 'datos':tipos_equipos_nuevos}
 
         tipos_equipos_actuales = set(TipoEquipo.obtener_todos().values_list('nombre', flat=True))
 
-        #if tipos_equipos_nuevos & tipos_equipos_actuales:
-        #    mensajes_error.append({'modelo':'Hay tipos de equipos ya registrados'})
+        if prohibir_duplicados and (tipos_equipos_nuevos & tipos_equipos_actuales):
+            mensajes_error.append({'modelo':'Hay tipos de equipos ya registrados'})
 
         if len(mensajes_error) > 0:
             respuesta.update({'resultado':False, 'errores':mensajes_error})
@@ -58,9 +73,10 @@ class TipoEquipo(ModeloBase):
         return respuesta
 
     @staticmethod
-    def registro_masivo(df_tipos_equipo: pd.DataFrame) -> None:
+    def registro_masivo(df_tipos_equipo: pd.DataFrame, prohibir_duplicados: bool=False) -> Dict[str, Union[bool, str, List[str]]]:
 
-        respuesta = TipoEquipo.validar_registro_masivo(df_tipos_equipo)
+        nombres_tipo_equipo = set(df_tipos_equipo.nombre_equipo.unique())
+        respuesta = TipoEquipo.validar_registro_masivo(nombres_tipo_equipo, prohibir_duplicados)
         resultado = respuesta['resultado']
         datos = respuesta['datos']
 
@@ -77,6 +93,8 @@ class TipoEquipo(ModeloBase):
                     tipo_equipo = TipoEquipo.obtener_por_nombre(nombre=tipo_equipo.strip())
                 tipo_equipo.campos_extra.add(*campos_asociar)
                 tipo_equipo.save()
+
+        return respuesta
 
 
 class Equipo(ModeloBase):
@@ -121,15 +139,82 @@ class Equipo(ModeloBase):
         """
         return self.informacion_adicional_equipo_asociados.all()
 
+    @staticmethod
+    def validar_registro_masivo(df_equipos: pd.DataFrame,
+        prohibir_duplicados_equipos:bool=False,
+        prohibir_duplicados_tipos: bool=False,
+        prohibir_duplicados_laboratorios: bool=False) -> Dict[str, Union[bool, str, List[str]]]:
+
+        mensajes_error = []
+
+        equipos_nuevos = set(df_equipos.no_inventario.unique())
+        equipos_nuevos = set(map(normalizar_nombres, equipos_nuevos)) # Eliminando caracteres \-\.\n\t
+
+        respuesta = {'resultado':True, 'errores':[], 'datos':df_equipos}
+
+        equipos_actuales = set(TipoEquipo.obtener_todos().values_list('nombre', flat=True))
+
+        df_tipos = df_equipos.copy()
+        df_tipos_simplificado = TipoEquipo.obtener_nombres_cargue_masivo_data_frame(df_tipos)
+        nombres_tipo_equipo = set(df_tipos_simplificado.nombre_equipo.unique())
+        respuesta_tipo = TipoEquipo.validar_registro_masivo(nombres_tipo_equipo, prohibir_duplicados_tipos)
+
+        resultado_tipos = respuesta_tipo['resultado']
+        if resultado_tipos:
+            mensajes_error.extend(respuesta_tipo['errores'])
+
+        respuesta_laboratorios = Laboratorio.validar_registro_masivo(df_equipos[['laboratorio']], prohibir_duplicados_laboratorios)
+        resultado_laboratorios = respuesta_laboratorios['resultado']
+        if resultado_laboratorios:
+            mensajes_error.extend(respuesta_laboratorios['errores'])
+
+        if prohibir_duplicados_equipos and (equipos_nuevos & equipos_actuales):
+            mensajes_error.append({'modelo':'Hay equipos ya registrados'})
+
+        if len(mensajes_error) > 0:
+            respuesta.update({'resultado':False, 'errores':mensajes_error})
+
+        return respuesta
+
+    @staticmethod
+    def registro_masivo(df_equipos: pd.DataFrame,
+        prohibir_duplicados_equipos:bool=False,
+        prohibir_duplicados_tipos: bool=False,
+        prohibir_duplicados_laboratorios: bool=False) -> None:
+
+        from apps.core.classes.lectura_archivos.utils import registrar_datos_dataframe_a_modelo
+
+        respuesta = Equipo.validar_registro_masivo(df_equipos, prohibir_duplicados_equipos, prohibir_duplicados_tipos, prohibir_duplicados_laboratorios)
+        resultado = respuesta['resultado']
+        errores = respuesta['errores']
+        datos = respuesta['datos']
+
+        if resultado:
+            df_tipos_simplificado = TipoEquipo.obtener_nombres_cargue_masivo_data_frame(datos)
+            print("----------- df_tipos_simplificado: ")
+            print(df_tipos_simplificado)
+            print("----------- df_tipos_simplificado: ")
+            print(datos[['laboratorio']])
+            #TipoEquipo.registro_masivo(df_tipos_simplificado, prohibir_duplicados_tipos)
+            #Laboratorio.registro_masivo(datos[['laboratorio']], prohibir_duplicados_laboratorios)
+
+
+            for index, row in datos.iterrows():
+                print("----------------------------------")
+                print(index, row)
+                #datos.applymap(lambda x:registrar_datos_dataframe_a_modelo(x))
+
+
+
 
 class CompraEquipo(ModeloBase):
-    equipo = models.ForeignKey(
-        Equipo,
+    tipo_equipo = models.ForeignKey(
+        TipoEquipo,
         related_name="compras_realizadas",
-        verbose_name="Equipos comprados",
+        verbose_name="Tipos de equipos comprados",
         on_delete=models.PROTECT
     )
-    cantidad = models.PositiveIntegerField(verbose_name="Cantidad de equipos comprados", validators=[MinValueValidator(1)])
+    cantidad = models.PositiveIntegerField(verbose_name="Cantidad de tipo de equipos comprados", validators=[MinValueValidator(1)])
     fecha = models.DateField()
     descripcion = models.TextField(verbose_name="Descripción compra", default="", blank=True)
     valor = models.FloatField(verbose_name="Valor total de la compra", validators=[MinValueValidator(0.0)])
@@ -168,7 +253,7 @@ class CampoExtra(ModeloBase):
     nombre = models.CharField(
         max_length=60,
         verbose_name="Campo extra con información adicional",
-        validators=[RegexValidator(regex=r"((_| )(\d)+$)", inverse_match=True)],
+        validators=[RegexValidator(regex=r"((_| |)(\d)+$)", inverse_match=True)],
         unique=True
     )
 
@@ -192,7 +277,7 @@ class CampoExtra(ModeloBase):
     def registro_masivo(listado_campos: List[str]) -> None:
         import re
 
-        campos_extra_relacionados = [re.sub(r"_(\d)+$", "", campo.upper()) for campo in listado_campos] #Elimino los _<numero> al final de los nombres
+        campos_extra_relacionados = [re.sub(r"(_|)(\d)+$", "", campo.upper()) for campo in listado_campos] #Elimino los _<numero> al final de los nombres
         for campo in campos_extra_relacionados:
             if not CampoExtra.existe_por_nombre(campo):
                 CampoExtra.objects.create(nombre=campo)

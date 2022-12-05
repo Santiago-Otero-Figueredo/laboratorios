@@ -1,10 +1,10 @@
 {% url 'equipos:listado' as listado_equipos %}
 {% url 'equipos:registro' as registro_equipo %}
-{% url 'equipos:registro_masivo_tipo' as registro_masivo_tipo %}
-
+{% url 'equipos:registro_masivo' as registro_masivo %}
 
 {% url 'equipos:listado_tipos' as listado_tipos %}
 {% url 'equipos:registro_tipo' as registro_tipo %}
+{% url 'equipos:registro_masivo_tipo' as registro_masivo_tipo %}
 
 {% url 'equipos:listado_campos' as listado_campos %}
 {% url 'equipos:registro_campo' as registro_campo %}
@@ -18,7 +18,7 @@
         <div class="menu-caret"></div>
     </a>
         <div class="menu-submenu">
-            <div class="menu-item has-sub {% if listado_equipos == request.path or registro_equipo == request.path %}active expand{% else %}closed{% endif %}">
+            <div class="menu-item has-sub {% if listado_equipos == request.path or registro_equipo == request.path or registro_masivo == request.path %}active expand{% else %}closed{% endif %}">
                 <a href="javascript:;" class="menu-link">
                     <i class=""></i>
                     <span>Equipos</span>
@@ -33,6 +33,11 @@
                     <div class="menu-item {% if registro_equipo in request.path %}active{% endif %}">
                         <a href="{{registro_equipo}}" class="menu-link">
                             <div class="menu-text">Registro</div>
+                        </a>
+                    </div>
+                    <div class="menu-item {% if registro_masivo in request.path %}active{% endif %}">
+                        <a href="{{registro_masivo}}" class="menu-link">
+                            <div class="menu-text">Registro masivo</div>
                         </a>
                     </div>
                 </div>

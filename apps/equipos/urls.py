@@ -3,6 +3,7 @@ from django.urls import path
 from apps.equipos.views import (
     ListadoEquipos,
     RegistroEquipo,
+    RegistroMasivoEquipos,
     ActualizarEquipo,
 
     ListadoTipoEquipos,
@@ -25,6 +26,7 @@ app_name = 'equipos'
 urlpatterns = [
     path("listado", ListadoEquipos.as_view(), name="listado"),
     path("registro", RegistroEquipo.as_view(), name="registro"),
+    path("registro/masivo", RegistroMasivoEquipos.as_view(), name="registro_masivo"),
     path("actualizar/<int:id_equipo>", ActualizarEquipo.as_view(), name="actualizar"),
 
     path("tipos/listado", ListadoTipoEquipos.as_view(), name="listado_tipos"),

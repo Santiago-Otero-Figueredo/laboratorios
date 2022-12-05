@@ -23,6 +23,32 @@ class RegistroEquipo(CreateView):
     success_url = reverse_lazy('equipos:listado')
 
 
+class RegistroMasivoEquipos(FormView):
+    template_name = "equipos/registro_masivo.html"
+    form_class = FormRegistroMasivo
+    success_url = reverse_lazy('equipos:listado')
+
+    def form_valid(self, form):
+        archivo = form.cleaned_data['archivo']
+        gestor_archivo = LecturaExcelPandas(
+            archivo=archivo,
+            modelo=Equipo,
+            columnas_a_normalizar=['NOMBRE_EQUIPO', 'LABORATORIO', 'UBICACION', 'NO_INVENTARIO'],
+            columnas_ignorar=['FECHA_ULTIMO_MANTENIMIENTO', 'FECHA_PROXIMO_MANTENIMIENTO', 'FECHA_ULTIMA_CALIBRACION', 'FECHA_PROXIMA_CALIBRACION']
+        )
+
+        respuesta = gestor_archivo._obtener_datos_cargados()
+        if respuesta['resultado'] is False:
+            messages.error(self.request, f'Fallo al cargar los datos {respuesta["errores"]}')
+            return super().form_invalid(form)
+
+        print("CARGANDO ARCHIVO")
+
+        Equipo.registro_masivo(respuesta['datos'])
+        messages.success(self.request, 'Tipos de equipos cargados con éxito')
+        return super().form_valid(form)
+
+
 class ActualizarEquipo(UpdateView):
     model = Equipo
     template_name = "equipos/registro.html"

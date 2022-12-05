@@ -84,49 +84,46 @@ class LecturaExcelPandas(LecturaArchivos):
         if self.columnas_ignorar:
             self.datos.drop(self.columnas_ignorar, axis=1, inplace=True)
 
+        self.datos.columns = list(map(normalizar_texto, self.datos.columns))
         self._remplazar_na()
 
 
     def _validar_datos(self) -> None:
+        total_datos = self.datos.shape[0]
+        columnas_en_df = set(self.datos.columns)
+
+        if total_datos == 0:  # no hay registros de estudiantes
+            self.errores.append({'vacio':'No hay registros en el archivo'})
+
+        df_auxiliar = self.datos.replace(r'^\s*$', np.nan, regex=True)
+        if self.prohibir_celdas_vacias and df_auxiliar.isnull().any().any():  # hay al menos 1 celda vacia
+            self.errores.append({'celdas':'No deben haber celdas vacías'})
 
         if len(self.columnas_esperadas) > 0:
-            total_datos = self.datos.shape[0]
-
-            if total_datos == 0:  # no hay registros de estudiantes
-                self.errores.append({'vacio':'No hay registros en el archivo'})
 
             if self.datos.shape[1] != len(self.columnas_esperadas):
                 self.errores.append({'datos':f'La cantidad de columnas no son las definidas, se esperan {len(self.columnas_esperadas)} columnas'})
 
-            df_auxiliar = self.datos.replace(r'^\s*$', np.nan, regex=True)
-            if self.prohibir_celdas_vacias and df_auxiliar.isnull().any().any():  # hay al menos 1 celda vacia
-                self.errores.append({'celdas':'No deben haber celdas vacías'})
-
-            self.datos.columns = list(map(normalizar_texto, self.datos.columns))
-
-            columnas_en_df = set(self.datos.columns)
-
             if len(self.columnas_esperadas & columnas_en_df) != len(self.columnas_esperadas):
                 self.errores.append({'datos':'Los nombres de las columnas no coinciden'})
 
-            if self.modelo:
+        if self.modelo:
+            datos_normalizados = self.datos.copy()
+            if self.columnas_a_normalizar:
+                if set(self.datos.columns).intersection(self.columnas_a_normalizar):
+                    datos_normalizados = datos_normalizados[self.columnas_a_normalizar].applymap(lambda x:normalizar_nombres(x), na_action='ignore')
+                else:
+                    self.errores.append({'normalizacion':'Las columnas a normalizar no existen el el archivo'})
 
-                datos_normalizados = self.datos.copy()
-                if self.columnas_a_normalizar:
-                    if self.columnas_esperadas.intersection(self.columnas_a_normalizar):
-                        datos_normalizados = datos_normalizados[self.columnas_a_normalizar].applymap(lambda x:normalizar_nombres(x), na_action='ignore')
-                    else:
-                        self.errores.append({'normalizacion':'Las columnas a normalizar no existen el el archivo'})
+            validacion_modelo = self.modelo.validar_registro_masivo(datos_normalizados)
+            resultado = validacion_modelo['resultado']
+            errores_modelo = validacion_modelo['errores']
+            datos = validacion_modelo['datos']
 
-                validacion_modelo = self.modelo.validar_registro_masivo(datos_normalizados)
-                resultado = validacion_modelo['resultado']
-                errores_modelo = validacion_modelo['errores']
-                datos = validacion_modelo['datos']
+            if resultado:
+                self.datos_normalizados = datos
 
-                if resultado:
-                    self.datos_normalizados = datos
-
-                self.errores.extend(errores_modelo) # Añado los elementos para ser parte de la lista, no los agrego asi evito una lista vacía dentro de la lista errores
+            self.errores.extend(errores_modelo) # Añado los elementos para ser parte de la lista, no los agrego asi evito una lista vacía dentro de la lista errores
 
 
     def _obtener_datos_cargados(self) -> Dict[str, Union[bool, pd.DataFrame, List[str]]]:

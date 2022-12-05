@@ -29,7 +29,9 @@ class Laboratorio(ModeloBase):
         return self.equipo_laboratorio_asignado.filter(equipo__pk=id_equipo)
 
     @staticmethod
-    def validar_registro_masivo(df_laboratorios: pd.DataFrame) -> Dict[str, Union[bool, str, List[str]]]:
+    def validar_registro_masivo(
+        df_laboratorios: pd.DataFrame,
+        prohibir_duplicados: bool=False) -> Dict[str, Union[bool, str, List[str]]]:
 
         mensajes_error = []
 
@@ -40,7 +42,7 @@ class Laboratorio(ModeloBase):
 
         laboratorios_actuales = set(Laboratorio.obtener_todos().values_list('nombre', flat=True))
 
-        if laboratorios_nuevos & laboratorios_actuales:
+        if prohibir_duplicados and (laboratorios_nuevos & laboratorios_actuales):
             mensajes_error.append({'modelo':'Hay laboratorios ya registrados'})
 
         if len(mensajes_error) > 0:
@@ -50,9 +52,9 @@ class Laboratorio(ModeloBase):
 
 
     @staticmethod
-    def registro_masivo(df_laboratorios: pd.DataFrame) -> None:
+    def registro_masivo(df_laboratorios: pd.DataFrame, prohibir_duplicados: bool=False) -> None:
 
-        respuesta = Laboratorio.validar_registro_masivo(df_laboratorios)
+        respuesta = Laboratorio.validar_registro_masivo(df_laboratorios, prohibir_duplicados)
         resultado = respuesta['resultado']
         datos = respuesta['datos']
 
