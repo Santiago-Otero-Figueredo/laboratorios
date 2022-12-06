@@ -30,7 +30,9 @@ class TipoEquipo(ModeloBase):
         through="equipos.CampoExtraTipoEquipo",
         blank=False
     )
-    nombre = models.CharField(max_length=255, verbose_name="Nombre", unique=True)
+    nombre = models.TextField(verbose_name="Nombre", unique=True)
+    descripcion = models.TextField(verbose_name="Descripción", default="")
+
 
     def __str__(self) -> str:
         return f'{self.nombre}'
@@ -39,17 +41,16 @@ class TipoEquipo(ModeloBase):
     def obtener_nombres_cargue_masivo_data_frame(df_datos: pd.DataFrame):
         columnas_df_tipos = list(set(df_datos.columns) - set(TipoEquipo.REGISTRO_MASIVO_COLUMNAS_IGORAR))
         df_tipos_simplificado = pd.DataFrame(df_datos['nombre_equipo'], columns=columnas_df_tipos)
-
         return df_tipos_simplificado
 
     @staticmethod
     def existe_por_nombre(nombre: str) -> bool:
-        return TipoEquipo.obtener_todos().filter(nombre=nombre)
+        return TipoEquipo.obtener_todos().filter(nombre__iexact=nombre).exists()
 
     @staticmethod
     def obtener_por_nombre(nombre: str) -> Optional['TipoEquipo']:
         try:
-            return TipoEquipo.obtener_todos().get(nombre=nombre)
+            return TipoEquipo.obtener_todos().get(nombre__iexact=nombre)
         except:
             return None
 
@@ -81,18 +82,19 @@ class TipoEquipo(ModeloBase):
         datos = respuesta['datos']
 
         if resultado:
-            df_tipos_equipo.dropna(how='all', axis='columns', inplace=True)
             campos_extra_relacionados = list(set(map(normalizar_nombres, df_tipos_equipo.columns)))
+            campos_extra_relacionados.remove('nombre_equipo')
             CampoExtra.registro_masivo(campos_extra_relacionados)
             campos_asociar = CampoExtra.obtener_por_listado_nombres(campos_extra_relacionados)
-
             for tipo_equipo in datos:
-                if not TipoEquipo.existe_por_nombre(tipo_equipo.strip()):
-                    tipo_equipo = TipoEquipo.objects.create(nombre=tipo_equipo.strip())
-                else:
-                    tipo_equipo = TipoEquipo.obtener_por_nombre(nombre=tipo_equipo.strip())
-                tipo_equipo.campos_extra.add(*campos_asociar)
-                tipo_equipo.save()
+                if tipo_equipo: # Si no es un caracter vacio
+                    print(tipo_equipo, " : ", TipoEquipo.existe_por_nombre(tipo_equipo.strip()))
+                    if not TipoEquipo.existe_por_nombre(tipo_equipo.strip()):
+                        tipo_equipo = TipoEquipo.objects.create(nombre=tipo_equipo.strip())
+                    else:
+                        tipo_equipo = TipoEquipo.obtener_por_nombre(nombre=tipo_equipo.strip())
+                    tipo_equipo.campos_extra.add(*campos_asociar)
+                    tipo_equipo.save()
 
         return respuesta
 
@@ -182,7 +184,6 @@ class Equipo(ModeloBase):
         prohibir_duplicados_tipos: bool=False,
         prohibir_duplicados_laboratorios: bool=False) -> None:
 
-        from apps.core.classes.lectura_archivos.utils import registrar_datos_dataframe_a_modelo
 
         respuesta = Equipo.validar_registro_masivo(df_equipos, prohibir_duplicados_equipos, prohibir_duplicados_tipos, prohibir_duplicados_laboratorios)
         resultado = respuesta['resultado']
@@ -191,19 +192,12 @@ class Equipo(ModeloBase):
 
         if resultado:
             df_tipos_simplificado = TipoEquipo.obtener_nombres_cargue_masivo_data_frame(datos)
-            print("----------- df_tipos_simplificado: ")
-            print(df_tipos_simplificado)
-            print("----------- df_tipos_simplificado: ")
-            print(datos[['laboratorio']])
-            #TipoEquipo.registro_masivo(df_tipos_simplificado, prohibir_duplicados_tipos)
-            #Laboratorio.registro_masivo(datos[['laboratorio']], prohibir_duplicados_laboratorios)
+            TipoEquipo.registro_masivo(df_tipos_simplificado, prohibir_duplicados_tipos)
+            Laboratorio.registro_masivo(datos[['laboratorio']], prohibir_duplicados_laboratorios)
 
 
             for index, row in datos.iterrows():
-                print("----------------------------------")
-                print(index, row)
-                #datos.applymap(lambda x:registrar_datos_dataframe_a_modelo(x))
-
+               pass
 
 
 

@@ -61,7 +61,7 @@ class LecturaExcelPandas(LecturaArchivos):
         self.modelo = modelo
         self.datos_normalizados = pd.DataFrame()
         self.columnas_a_normalizar = list(set(map(normalizar_texto, columnas_a_normalizar))) # Convierto los elementos a minúscula y quito acentos
-        self.columnas_ignorar = columnas_ignorar
+        self.columnas_ignorar = list(set(map(normalizar_texto, columnas_ignorar))) # Convierto los elementos a minúscula y quito acentos
 
         self._leer_archivo(self.ruta_archivo)
         self._validar_datos()
@@ -77,6 +77,7 @@ class LecturaExcelPandas(LecturaArchivos):
         """
 
         self.datos = pd.read_excel(archivo, engine='openpyxl')
+        self.datos.columns = list(map(normalizar_texto, self.datos.columns))
         if self.prohibir_columnas_vacias:
            self.datos.dropna(how='all', axis='columns', inplace=True) # Eliminar columnas na
         self.datos.dropna(how='all', axis='index', inplace=True) # Eliminar filas na
@@ -84,7 +85,7 @@ class LecturaExcelPandas(LecturaArchivos):
         if self.columnas_ignorar:
             self.datos.drop(self.columnas_ignorar, axis=1, inplace=True)
 
-        self.datos.columns = list(map(normalizar_texto, self.datos.columns))
+
         self._remplazar_na()
 
 

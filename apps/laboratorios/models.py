@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import QuerySet
 from django.core.validators import MinValueValidator
 
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 
 from apps.core.models import ModeloBase
 
@@ -27,6 +27,17 @@ class Laboratorio(ModeloBase):
     def esta_asignado_equipo(self, id_equipo: int) -> bool:
 
         return self.equipo_laboratorio_asignado.filter(equipo__pk=id_equipo)
+
+    @staticmethod
+    def existe_por_nombre(nombre: str) -> bool:
+        return Laboratorio.objects.filter(nombre__iexact=nombre).exists()
+
+    @staticmethod
+    def obtener_por_nombre(nombre: str) -> Optional['Laboratorio']:
+        try:
+            return Laboratorio.objects.get(nombre__iexact=nombre)
+        except:
+            return None
 
     @staticmethod
     def validar_registro_masivo(
@@ -60,7 +71,9 @@ class Laboratorio(ModeloBase):
 
         if resultado:
             for laboratorio in datos:
-                Laboratorio.objects.create(nombre=laboratorio.strip())
+                if laboratorio:
+                    if not Laboratorio.existe_por_nombre(laboratorio):
+                        Laboratorio.objects.create(nombre=laboratorio.strip())
 
 class PracticaLaboratorio(ModeloBase):
     laboratorio = models.ForeignKey(
